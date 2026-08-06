@@ -6,8 +6,9 @@ export default function OrderBuilder({ onGenerateImage }) {
   const [catalog, setCatalog] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [cart, setCart] = useState([]);
-  const [discountValue, setDiscountValue] = useState(0);
-  const [discountType, setDiscountType] = useState('amount'); // 'amount' or 'percentage'
+  
+  // Fixed percentage discount defaulting to 4.5
+  const [discountPercent, setDiscountPercent] = useState(4.5);
 
   useEffect(() => {
     db.items.toArray().then(setCatalog);
@@ -44,12 +45,9 @@ export default function OrderBuilder({ onGenerateImage }) {
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
 
-  // Discount Calculation
-  const parsedDiscount = parseFloat(discountValue || 0);
-  const calculatedDiscountAmount = discountType === 'percentage'
-    ? (subtotal * parsedDiscount) / 100
-    : parsedDiscount;
-
+  // Math calculation strictly for percentage discount
+  const parsedDiscount = parseFloat(discountPercent || 0);
+  const calculatedDiscountAmount = (subtotal * parsedDiscount) / 100;
   const finalTotal = Math.max(0, subtotal - calculatedDiscountAmount);
 
   const searchResults = searchTerm
@@ -132,26 +130,17 @@ export default function OrderBuilder({ onGenerateImage }) {
               <span>₹{subtotal.toFixed(2)}</span>
             </div>
 
-            {/* Discount Toggle & Field */}
+            {/* Percentage-Only Discount Field */}
             <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Discount:</span>
-              <div className="flex items-center gap-2">
-                <select
-                  value={discountType}
-                  onChange={(e) => setDiscountType(e.target.value)}
-                  className="px-2 py-1 border rounded text-xs bg-gray-50 focus:outline-none"
-                >
-                  <option value="amount">₹ (Fixed)</option>
-                  <option value="percentage">% (Percentage)</option>
-                </select>
-                <input
-                  type="number"
-                  min="0"
-                  value={discountValue}
-                  onChange={(e) => setDiscountValue(e.target.value)}
-                  className="w-24 px-2 py-1 border rounded text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
-              </div>
+              <span className="text-gray-600">Discount (%):</span>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                value={discountPercent}
+                onChange={(e) => setDiscountPercent(e.target.value)}
+                className="w-24 px-2 py-1 border rounded text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
             </div>
 
             <div className="flex justify-between text-lg font-bold text-gray-900 border-t pt-2">
@@ -160,7 +149,7 @@ export default function OrderBuilder({ onGenerateImage }) {
             </div>
 
             <button
-              onClick={() => onGenerateImage({ cart })}
+              onClick={() => onGenerateImage({ cart, discountPercent })}
               className="w-full mt-4 bg-green-600 text-white py-2.5 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
             >
               <Printer size={18} /> Print / Generate Order Image
