@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '../db';
 import * as XLSX from 'xlsx';
-import { Trash2, Edit2, Upload, Plus, Search, Check, X } from 'lucide-react';
+import { Trash2, Edit2, Upload, Plus, Search, Check, X, Download } from 'lucide-react';
 
 export default function StockManager() {
   const [items, setItems] = useState([]);
@@ -86,6 +86,34 @@ export default function StockManager() {
     reader.readAsArrayBuffer(file);
   };
 
+  const handleExportExcel = () => {
+    if (items.length === 0) {
+      alert('No items to export.');
+      return;
+    }
+    // Format the keys exactly as expected by the import parser: "Item Name" and "Price"
+    const exportData = items.map((item) => ({
+      'Item Name': item.name,
+      'Price': item.price,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Stock List');
+    XLSX.writeFile(workbook, `Stock_List_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+
+  const handleClearCatalog = async () => {
+    if (items.length === 0) {
+      alert('Stock list is already empty.');
+      return;
+    }
+    if (window.confirm('Are you sure you want to clear the entire stock catalog? This action cannot be undone.')) {
+      await db.items.clear();
+      loadItems();
+    }
+  };
+
   const filteredItems = items.filter(i =>
     i.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -131,17 +159,31 @@ export default function StockManager() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-gray-800">Stock Catalog ({items.length})</h2>
-          <div className="relative w-64">
-            <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={handleExportExcel}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition cursor-pointer"
+            >
+              <Download size={16} /> Export Excel
+            </button>
+            <button
+              onClick={handleClearCatalog}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition cursor-pointer"
+            >
+              <Trash2 size={16} /> Clear Catalog
+            </button>
+            <div className="relative w-64">
+              <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search items..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
         </div>
 
