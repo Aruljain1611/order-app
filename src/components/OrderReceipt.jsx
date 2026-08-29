@@ -39,8 +39,8 @@ export default function OrderReceipt({ orderData, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl p-6 max-w-md w-full space-y-4">
+    <div className="fixed inset-0 bg-black/50 flex items-start justify-center p-4 z-50 overflow-y-auto">
+      <div className="bg-white rounded-xl p-6 max-w-md w-full my-8 space-y-4">
         <h2 className="text-lg font-bold text-gray-800">Order Image Preview</h2>
 
         {/* Clean Receipt Container (Summary Math Removed) */}
