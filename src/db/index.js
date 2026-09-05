@@ -6,3 +6,8 @@ export const db = new Dexie('StockOrderDB');
 db.version(1).stores({
   items: '++id, name, price'
 });
+
+db.version(2).stores({
+  items: '++id, name, price',
+  challans: '++id, challanNo, buyerName, date, createdAt'
+});

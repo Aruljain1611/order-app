@@ -1,1 +1,39 @@
 @import "tailwindcss";
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .challan-print-root,
+  .challan-print-root * {
+    visibility: visible !important;
+  }
+
+  .challan-print-root {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+
+  .challan-page {
+    border: 2px solid black !important;
+    box-shadow: none !important;
+    margin: 0 auto 0.8cm auto !important;
+    padding: 1.25rem !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: white !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0.8cm;
+  }
+}
